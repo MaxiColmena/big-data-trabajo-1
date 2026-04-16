@@ -18,8 +18,8 @@ import os
 # CONFIGURACIÓN
 # =============================================================================
 
-FILEPATH = r'C:\Users\IPF-2026\Desktop\big-data-trabajo-1\fifa.csv'
-OUTPUT_DIR = r'C:\Users\IPF-2026\Desktop\big-data-trabajo-1'
+FILEPATH = r'fifa.csv'
+OUTPUT_DIR = r'.'
 OUTPUT_HTML = os.path.join(OUTPUT_DIR, 'fifa_dashboard_completo.html')
 
 # =============================================================================
@@ -173,7 +173,8 @@ def create_age_histogram(df: pd.DataFrame) -> str:
         borderwidth=1
     )
 
-    return fig.to_html(full_html=False, include_plotlyjs=False)
+    # El primer gráfico incluye la librería Plotly (el resto usa la misma instancia)
+    return fig.to_html(full_html=False, include_plotlyjs='cdn')
 
 
 def create_top_countries_bar(df: pd.DataFrame, top_n: int = 10) -> str:
@@ -198,11 +199,13 @@ def create_top_countries_bar(df: pd.DataFrame, top_n: int = 10) -> str:
     )
 
     # Personalización del diseño
+    max_count = country_counts['Count'].max()
     fig.update_layout(
         title_font_size=20,
         title_x=0.5,
         xaxis_title='País',
         yaxis_title='Cantidad de Jugadores',
+        yaxis_range=[0, max_count * 1.15],  # espacio para etiquetas externas
         template='plotly_white',
         coloraxis_showscale=False,
         height=500
@@ -366,22 +369,26 @@ def create_summary_dashboard(df: pd.DataFrame) -> str:
 
     # 4. Box plot de Value por Age Group
     df_temp = df.copy()
+    age_order = ['<20', '20-25', '26-30', '31-35', '>35']
     df_temp['Age_Group'] = pd.cut(
         df_temp['Age'],
         bins=[0, 20, 25, 30, 35, 50],
-        labels=['<20', '20-25', '26-30', '31-35', '>35']
-    )
+        labels=age_order
+    ).astype(str)  # convertir a string para orden correcto en Plotly
     df_temp['Value_Millions'] = df_temp['Value'] / 1_000_000
 
-    fig.add_trace(
-        go.Box(
-            x=df_temp['Age_Group'],
-            y=df_temp['Value_Millions'],
-            name='Valor (M EUR)',
-            marker_color='#48CAE4'
-        ),
-        row=2, col=2
-    )
+    # Agregar un trace por grupo para respetar el orden
+    for group in age_order:
+        mask = df_temp['Age_Group'] == group
+        fig.add_trace(
+            go.Box(
+                y=df_temp.loc[mask, 'Value_Millions'],
+                name=group,
+                marker_color='#48CAE4',
+                showlegend=False
+            ),
+            row=2, col=2
+        )
 
     # Actualizar layout
     fig.update_layout(
@@ -390,8 +397,8 @@ def create_summary_dashboard(df: pd.DataFrame) -> str:
         title_x=0.5,
         showlegend=False,
         template='plotly_white',
-        height=700,
-        width=1200
+        height=700
+        # sin width fijo: el gráfico se adapta al contenedor HTML
     )
 
     fig.update_xaxes(title_text='Edad', row=1, col=1)
@@ -431,7 +438,7 @@ def generate_complete_html(df: pd.DataFrame, output_path: str):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FIFA Dataset - Dashboard Interactivo Completo</title>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Plotly JS es incluido inline por el primer gráfico (include_plotlyjs='cdn') -->
     <style>
         /* =============================================================================
            ESTILOS GLOBALES

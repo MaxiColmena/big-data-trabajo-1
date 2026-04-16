@@ -31,7 +31,7 @@ Este repositorio contiene un **análisis exploratorio de datos (EDA) completo** 
 
 ### 🏆 Resultados
 
-- ✅ **18,207 jugadores analizados** de 164 países
+- ✅ **18,208 jugadores analizados** de 164 países
 - ✅ **4 visualizaciones interactivas** generadas
 - ✅ **Dashboard unificado** con navegación y explicaciones
 - ✅ **Pipeline reproducible** documentado
@@ -44,7 +44,7 @@ Este repositorio contiene un **análisis exploratorio de datos (EDA) completo** 
 big-data-trabajo-1/
 │
 ├── 📄 README.md                    # Documentación completa del proyecto
-├── 📄 fifa.csv                     # Dataset original (18,207 registros)
+├── 📄 fifa.csv                     # Dataset original (18,208 registros)
 │
 ├── 🐍 generate_unified_dashboard.py # Script principal de generación
 ├── 🐍 fifa_visualizations.py       # Módulo de visualizaciones (alternativo)
@@ -65,11 +65,15 @@ big-data-trabajo-1/
 
 El dataset **FIFA Player Statistics** contiene información detallada de jugadores de fútbol profesional, extraída de la base de datos del videojuego FIFA. Los datos incluyen características demográficas, habilidades técnicas, atributos físicos y valores de mercado.
 
+### 📌 Actividad 1 — Fuente de Datos
+
+El dataset utilizado en este proyecto, **FIFA Player Statistics**, fue extraído de [Kaggle](https://www.kaggle.com/), una plataforma pública de ciencia de datos que aloja datasets listos para análisis. El archivo `fifa.csv` contiene información de jugadores registrados en el videojuego FIFA 19, incluyendo atributos de juego, datos demográficos y valores de mercado, y fue publicado originalmente por la comunidad de Kaggle como recurso de práctica para análisis de datos deportivos.
+
 ### Dimensiones
 
 | Métrica | Valor |
 |---------|-------|
-| **Registros** | 18,207 jugadores |
+| **Registros** | 18,208 jugadores |
 | **Variables** | 89 columnas |
 | **Países** | 164 nacionalidades |
 | **Formato** | CSV (8.7 MB) |
@@ -182,14 +186,54 @@ def parse_value(value):
 
 | Métrica | Valor |
 |---------|-------|
-| Registros válidos | 18,207 (100%) |
+| Registros válidos | 18,208 (100%) |
 | Duplicados eliminados | 0 |
 | Valores nulos críticos | 0 |
 | Variables transformadas | 1 (`Value`) |
 
 ---
 
+### ⚠️ Actividad 3 — Problemas Comunes al Manipular los Datos
+
+Durante el preprocesamiento del dataset FIFA se identificaron dos problemas principales que requirieron tratamiento especial:
+
+#### 1. Formato no numérico de la columna `Value`
+
+La columna `Value` (valor de mercado del jugador) no contenía números directamente utilizables, sino cadenas de texto con el símbolo monetario `€` y sufijos multiplificadores:
+
+- `€110.5M` → debe interpretarse como **110,500,000** euros (sufijo `M` = millones × 1,000,000)
+- `€565K` → debe interpretarse como **565,000** euros (sufijo `K` = miles × 1,000)
+- `€0` → jugadores sin valor de mercado asignado
+
+Este problema es muy frecuente en datasets financieros reales. Para solucionarlo se implementó la función `clean_value_column()`, que elimina el símbolo `€`, detecta el sufijo y multiplica por el factor correspondiente, convirtiendo cada valor a un número flotante puro apto para cálculos y visualizaciones.
+
+#### 2. Alta proporción de valores nulos en columnas auxiliares
+
+Algunas columnas presentaron tasas de nulidad muy elevadas que debieron ser tratadas con cuidado:
+
+| Columna | Nulos | % del total | Causa probable |
+|---------|-------|-------------|----------------|
+| `Loaned From` | ~16,943 | ~93% | Solo aplica a jugadores cedidos. La gran mayoría no están en calidad de préstamo, por lo que el nulo es esperado y **no es un error**. |
+| `Release Clause` | ~1,564 | ~8.6% | No todos los jugadores tienen cláusula de rescisión en su contrato. |
+
+Estos nulos no fueron imputados porque hacerlo introduciría información ficticia. En cambio, se documentaron y se excluyeron del análisis cuando correspondió.
+
+---
+
 ## 📊 Visualizaciones Generadas
+
+### 🎯 Actividad 2 — Justificación de Gráficos
+
+La elección de cada tipo de visualización responde a la clasificación teórica estándar del material de estudio, que organiza los gráficos según su **propósito comunicativo**:
+
+| Tipo de Gráfico | Categoría Teórica | Variable Representada | Justificación |
+|-----------------|-------------------|-----------------------|---------------|
+| **Histograma de Edad** | 📊 **Distribución** | `Age` | El histograma es el gráfico canónico para mostrar cómo se distribuye una variable numérica continua. Permite observar el rango, la concentración y la asimetría de la edad de los jugadores. |
+| **Box Plot de Valor por Grupo Etario** | 📊 **Distribución** | `Value` × `Age Group` | El diagrama de caja y bigotes muestra la dispersión, la mediana y los outliers de una variable numérica para distintos grupos. Es ideal para comparar la distribución del valor de mercado entre rangos de edad. |
+| **Barras — Top 10 Países** | 📈 **Comparación** | `Nationality` | El gráfico de barras es el tipo más efectivo para comparar magnitudes entre categorías discretas. Permite ver claramente qué países tienen mayor representación de jugadores. |
+| **Scatter Plot — Overall vs Value** | 🔗 **Relación** | `Overall` vs `Value` | El diagrama de dispersión es la herramienta estándar para visualizar la relación (o correlación) entre dos variables numéricas. Permite detectar tendencias, outliers y oportunidades de mercado. |
+
+---
 
 ### 1. Histograma de Edad
 
@@ -327,7 +371,33 @@ Resto (144):   31.4% del total
 
 ---
 
-### 4. Dashboard Resumen (4 Gráficos Integrados)
+### 4. Dashboard Resumen (4 Gráficos Integrados) — Actividad 5
+
+#### 🖥️ Elementos, Características y Beneficios del Dashboard
+
+Un **cuadro de mando (dashboard)** es una herramienta de visualización que consolida múltiples métricas e indicadores clave en una única interfaz, facilitando la toma de decisiones basada en datos para distintos tipos de stakeholders (directivos, analistas, scouts).
+
+**Elementos del dashboard elaborado:**
+
+| Elemento | Descripción |
+|----------|-------------|
+| **Histograma de Age** | Muestra la distribución etaria del plantel analizado |
+| **Histograma de Overall** | Expone la distribución del rating de calidad de los jugadores |
+| **Gráfico de Barras – Top 5 Países** | Compara los mercados con mayor volumen de jugadores |
+| **Box Plot – Valor por Grupo Etario** | Analiza la dispersión del valor de mercado según la edad |
+
+**Características destacadas:**
+
+- **Interactividad nativa:** Todos los gráficos permiten zoom, paneo y tooltip al pasar el cursor, habilitando exploración sin necesidad de reprocesar datos.
+- **Layout de cuadrícula 2×2:** El diseño en grilla permite comparar visualmente las cuatro métricas de forma simultánea, sin necesidad de desplazarse entre pestañas.
+- **Paleta de colores coherente:** Se utilizaron colores distintivos por tipo de gráfico (`#2E86AB`, `#E94560`, `#023E8A`, `#48CAE4`) para facilitar la identificación rápida de cada visualización.
+- **Exportación standalone:** El dashboard completo se genera como un único archivo `.html` autocontenido, sin necesidad de servidor ni conexión a internet para visualizarlo.
+
+**Beneficios para la toma de decisiones:**
+
+- Los **scouts** pueden identificar en segundos el perfil etario y de calidad del mercado.
+- Los **analistas financieros** obtienen una visión clara de cómo evoluciona el valor de mercado con la edad.
+- Los **directivos** acceden a un resumen ejecutivo listo para presentar sin configuración adicional.
 
 **Componentes:**
 
@@ -671,6 +741,49 @@ correlations = df.corr()['Value'].sort_values(ascending=False)
 
 ---
 
+## ✅ Actividad 7 — Efectividad de las Visualizaciones
+
+Las cuatro visualizaciones generadas en este proyecto son **efectivas** para representar el dataset FIFA por las siguientes razones:
+
+### 1. Interactividad con Plotly
+
+A diferencia de librerías estáticas como Matplotlib o Seaborn, Plotly genera gráficos **completamente interactivos** en el navegador. El usuario puede:
+- Hacer **zoom** en zonas de interés (por ejemplo, jugadores con Overall > 85)
+- Ver **tooltips detallados** al pasar el cursor sobre cada punto (nombre, club, valor, edad)
+- **Filtrar series** haciendo clic en la leyenda
+- **Descargar** el gráfico como imagen PNG con un solo clic
+
+Esta interactividad convierte las visualizaciones en herramientas de exploración activa, no meros reportes pasivos.
+
+### 2. Claridad visual y paleta de colores
+
+Se evitaron colores arbitrarios o sobrecargados. En cambio:
+- Los **histogramas** usan un azul uniforme (`#2E86AB`) que no distrae del patrón de distribución.
+- El **scatter plot** usa la escala `Plasma` (de azul oscuro a amarillo) para codificar el Overall, haciendo intuitivo que los puntos más brillantes son los mejores jugadores.
+- El **gráfico de barras** usa la escala `Viridis`, legible incluso en condiciones de daltonismo.
+- Se incluyen **líneas de media** y **curvas de tendencia** que guían la interpretación sin saturar el gráfico.
+
+### 3. Detección ágil de patrones
+
+Cada gráfico fue diseñado para responder una pregunta analítica concreta:
+
+| Pregunta | Visualización | Patrón detectable |
+|----------|--------------|-------------------|
+| ¿Cómo se distribuyen las edades? | Histograma | Asimetría positiva; concentración en 20-28 años |
+| ¿Qué países dominan? | Barras | Inglaterra lidera con amplia ventaja |
+| ¿Hay relación calidad-valor? | Scatter Plot | Tendencia exponencial con r = 0.627 |
+| ¿Cómo varía el valor con la edad? | Box Plot | Pico en 26-30 años; outliers en >35 |
+
+### 4. Formato HTML standalone
+
+Los gráficos se exportan a HTML autocontenido, lo que permite **compartirlos sin instalar ningún software**, abrirlos directamente en cualquier navegador moderno y mantener toda su interactividad. Esto los hace especialmente adecuados para presentaciones a stakeholders no técnicos.
+
+### Conclusión
+
+La combinación de **interactividad nativa de Plotly**, **paletas de color semánticamente significativas**, **curvas de tendencia explícitas** y **exportación sin dependencias externas** hace que estas visualizaciones cumplan con los principios de efectividad en la comunicación de datos: son claras, honestas, interactivas y accionables.
+
+---
+
 ## 📝 Conclusiones
 
 ### Resumen de Hallazgos
@@ -724,7 +837,13 @@ Para preguntas o sugerencias sobre este análisis, por favor abre un issue en el
 
 <div align="center">
 
-**Hecho con ❤️ para Big Data - Trabajo Práctico 1**
+**Hecho con ❤️ para Big Data - Trabajo Práctico 1 -
+Alumnos:
+Ayala, Santiago
+Colman, Maximo
+Martínez, Javier
+Pereyra, Ramiro
+Zigaran, Lucas**
 
 📊 **Dashboard:** `fifa_dashboard_completo.html` | 🐍 **Script:** `generate_unified_dashboard.py`
 
