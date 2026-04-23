@@ -338,9 +338,9 @@ def create_overall_value_scatter(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def create_summary_dashboard(df: pd.DataFrame) -> go.Figure:
+def create_summary_reporte(df: pd.DataFrame) -> go.Figure:
     """
-    Crea un dashboard resumen con multiples metricas clave.
+    Crea un reporte resumen con multiples metricas clave.
 
     Args:
         df: DataFrame preprocesado
@@ -421,7 +421,7 @@ def create_summary_dashboard(df: pd.DataFrame) -> go.Figure:
 
     # Actualizar layout
     fig.update_layout(
-        title_text='<b>Dashboard Resumen - Dataset FIFA</b>',
+        title_text='<b>Reporte Resumen - Dataset FIFA</b>',
         title_font_size=24,
         title_x=0.5,
         showlegend=False,
@@ -451,7 +451,8 @@ def generate_landing_page(
     fig2_html: str,
     fig3_html: str,
     fig4_html: str,
-    output_path: str
+    output_path: str,
+    df: pd.DataFrame = None
 ) -> None:
     """
     Genera una Landing Page HTML5 completa con los graficos de Plotly embebidos.
@@ -465,8 +466,9 @@ def generate_landing_page(
         fig1_html: Div HTML del histograma de edades (Plotly to_html)
         fig2_html: Div HTML del grafico de barras Top 10 paises
         fig3_html: Div HTML del scatter plot Overall vs Value
-        fig4_html: Div HTML del dashboard resumen (subplots)
+        fig4_html: Div HTML del reporte resumen (subplots)
         output_path: Ruta completa del archivo .html de salida
+        df: DataFrame con los datos (opcional, para incluir estadísticas)
 
     Returns:
         None. Guarda el archivo HTML en output_path.
@@ -477,18 +479,21 @@ def generate_landing_page(
         fig1_div = pio.to_html(fig_age, full_html=False, include_plotlyjs='cdn')
         fig2_div = pio.to_html(fig_countries, full_html=False, include_plotlyjs=False)
         fig3_div = pio.to_html(fig_scatter, full_html=False, include_plotlyjs=False)
-        fig4_div = pio.to_html(fig_dashboard, full_html=False, include_plotlyjs=False)
+        fig4_div = pio.to_html(fig_reporte, full_html=False, include_plotlyjs=False)
 
         generate_landing_page(fig1_div, fig2_div, fig3_div, fig4_div,
-                              'fifa_landing_page.html')
+                              'fifa_landing_page.html', df)
     """
+    # Valores por defecto si df no se proporciona
+    num_jugadores = len(df) if df is not None else 18208
+    num_paises = df['Nationality'].nunique() if df is not None else 164
     html_template = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Dashboard interactivo con analisis exploratorio del dataset FIFA 19. Visualizaciones de distribucion etaria, top paises, relacion calidad-valor y resumen estadistico.">
-    <title>FIFA Analytics Dashboard</title>
+    <meta name="description" content="Reporte interactivo con analisis exploratorio del dataset FIFA 19. Visualizaciones de distribucion etaria, top paises, relacion calidad-valor y resumen estadistico.">
+    <title>FIFA Analytics Reporte</title>
     <style>
         /* ==============================
            RESET Y VARIABLES GLOBALES
@@ -833,19 +838,19 @@ def generate_landing_page(
     ============================================================ -->
     <header>
         <div class="header-badge">Big Data &mdash; Trabajo Pr&aacute;ctico 1</div>
-        <h1>FIFA Analytics Dashboard</h1>
+        <h1>FIFA Analytics Reporte</h1>
         <p class="subtitle">
             An&aacute;lisis exploratorio interactivo del dataset FIFA 19: distribuciones,
             comparaciones geogr&aacute;ficas y relaci&oacute;n calidad&ndash;valor de mercado.
         </p>
         <div class="header-stats">
             <div class="stat-item">
-                <span class="stat-value">{len(df):,}</span>
+                <span class="stat-value">{num_jugadores:,}</span>
                 <span class="stat-label">Jugadores</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value">164</span>
-                <span class="stat-label">Pa&iacute;ses</span>
+                <span class="stat-value">{num_paises}</span>
+                <span class="stat-label">Países</span>
             </div>
             <div class="stat-item">
                 <span class="stat-value">89</span>
@@ -867,7 +872,7 @@ def generate_landing_page(
             <li><a href="#distribucion-edad">Distribuci&oacute;n de Edad</a></li>
             <li><a href="#top-paises">Top Pa&iacute;ses</a></li>
             <li><a href="#overall-valor">Overall vs Valor</a></li>
-            <li><a href="#dashboard">Dashboard Resumen</a></li>
+            <li><a href="#reporte">Reporte Resumen</a></li>
         </ul>
     </nav>
 
@@ -878,13 +883,13 @@ def generate_landing_page(
 
         <!-- SECCION DE INTRODUCCION -->
         <section class="intro-section" id="introduccion">
-            <h2>&#128200; Sobre este Dashboard</h2>
+            <h2>&#128200; Sobre este Reporte</h2>
             <p>
-                Este dashboard interactivo presenta un an&aacute;lisis exploratorio de datos (EDA) completo
+                Este reporte interactivo presenta un an&aacute;lisis exploratorio de datos (EDA) completo
                 sobre el dataset <strong>FIFA Player Statistics</strong>, extra&iacute;do de
                 <a href="https://www.kaggle.com" style="color: var(--color-accent);" target="_blank" rel="noopener">Kaggle</a>.
-                El dataset contiene informaci&oacute;n detallada de <strong>{len(df):,} jugadores profesionales</strong>
-                de 164 pa&iacute;ses, incluyendo atributos de juego, datos demogr&aacute;ficos y valores de mercado.
+                El dataset contiene informaci&oacute;n detallada de <strong>{num_jugadores:,} jugadores profesionales</strong>
+                de {num_paises} pa&iacute;ses, incluyendo atributos de juego, datos demogr&aacute;ficos y valores de mercado.
             </p>
             <p>
                 Las cuatro visualizaciones fueron construidas con <strong>Plotly</strong> y clasificadas
@@ -912,7 +917,7 @@ def generate_landing_page(
                     <span class="chart-badge badge-dist">Distribuci&oacute;n</span>
                     <h2>Distribuci&oacute;n Etaria de Jugadores</h2>
                     <p>
-                        El histograma muestra c&oacute;mo se distribuyen las edades de los {len(df):,} jugadores.
+                        El histograma muestra c&oacute;mo se distribuyen las edades de los {num_jugadores:,} jugadores.
                         La l&iacute;nea punteada indica la media del dataset (~25 a&ntilde;os).
                     </p>
                 </div>
@@ -965,13 +970,13 @@ def generate_landing_page(
 
         <hr class="section-divider">
 
-        <!-- GRAFICO 4: DASHBOARD RESUMEN -->
-        <section class="chart-section" id="dashboard">
+        <!-- GRAFICO 4: REPORTE RESUMEN -->
+        <section class="chart-section" id="reporte">
             <div class="chart-header">
                 <div class="chart-icon">&#128203;</div>
                 <div class="chart-header-text">
-                    <span class="chart-badge badge-dist">Dashboard</span>
-                    <h2>Dashboard Resumen &mdash; 4 M&eacute;tricas Clave</h2>
+                    <span class="chart-badge badge-dist">Reporte</span>
+                    <h2>Reporte Resumen &mdash; 4 M&eacute;tricas Clave</h2>
                     <p>
                         Vista consolidada con histograma de edad, histograma de overall, top 5 pa&iacute;ses
                         y box plot de valor de mercado por grupo etario. Ideal para una presentaci&oacute;n
@@ -991,7 +996,7 @@ def generate_landing_page(
     ============================================================ -->
     <footer>
         <p>
-            <strong>FIFA Analytics Dashboard</strong> &mdash;
+            <strong>FIFA Analytics Reporte</strong> &mdash;
             Big Data &bull; Trabajo Pr&aacute;ctico 1 &bull;
             Generado con Python + Plotly &bull; Dataset: FIFA 19 (Kaggle)
         </p>
@@ -1087,16 +1092,16 @@ def main():
     """)
 
     # ==========================================================================
-    # VISUALIZACION 4: Dashboard Resumen
+    # VISUALIZACION 4: Reporte Resumen
     # ==========================================================================
-    print("\n4. Generando dashboard resumen...")
-    fig_dashboard = create_summary_dashboard(df)
-    fig_dashboard.show()
+    print("\n4. Generando reporte resumen...")
+    fig_reporte = create_summary_reporte(df)
+    fig_reporte.show()
 
     print("""
-    INTERPRETACION - Dashboard Resumen:
+    INTERPRETACION - Reporte Resumen:
     ----------------------------------
-    El dashboard integra multiples visualizaciones en una sola vista.
+    El reporte integra multiples visualizaciones en una sola vista.
     - Permite una comprension rapida del dataset completo
     - Facilita la comparacion entre diferentes metricas
 
@@ -1161,8 +1166,8 @@ def main():
     fig_scatter.write_html(f"{output_dir}\\fifa_overall_value_scatter.html")
     print(f"Guardado: {output_dir}\\fifa_overall_value_scatter.html")
 
-    fig_dashboard.write_html(f"{output_dir}\\fifa_dashboard.html")
-    print(f"Guardado: {output_dir}\\fifa_dashboard.html")
+    fig_reporte.write_html(f"{output_dir}\\fifa_reporte.html")
+    print(f"Guardado: {output_dir}\\fifa_reporte.html")
 
     print("\n" + "="*60)
     print("PROCESO COMPLETADO EXITOSAMENTE")
