@@ -31,7 +31,7 @@ Este repositorio contiene un **análisis exploratorio de datos (EDA) completo** 
 
 ### 🏆 Resultados
 
-- ✅ **18,208 jugadores analizados** de 164 países
+- ✅ **18,207 jugadores analizados** de 164 países
 - ✅ **4 visualizaciones interactivas** generadas
 - ✅ **Dashboard unificado** con navegación y explicaciones
 - ✅ **Pipeline reproducible** documentado
@@ -44,7 +44,7 @@ Este repositorio contiene un **análisis exploratorio de datos (EDA) completo** 
 big-data-trabajo-1/
 │
 ├── 📄 README.md                    # Documentación completa del proyecto
-├── 📄 fifa.csv                     # Dataset original (18,208 registros)
+├── 📄 fifa.csv                     # Dataset original (18,207 registros)
 │
 ├── 🐍 generate_unified_dashboard.py # Script principal de generación
 ├── 🐍 fifa_visualizations.py       # Módulo de visualizaciones (alternativo)
@@ -73,7 +73,7 @@ El dataset utilizado en este proyecto, **FIFA Player Statistics**, fue extraído
 
 | Métrica | Valor |
 |---------|-------|
-| **Registros** | 18,208 jugadores |
+| **Registros** | 18,207 jugadores |
 | **Variables** | 89 columnas |
 | **Países** | 164 nacionalidades |
 | **Formato** | CSV (8.7 MB) |
@@ -186,7 +186,7 @@ def parse_value(value):
 
 | Métrica | Valor |
 |---------|-------|
-| Registros válidos | 18,208 (100%) |
+| Registros válidos | 18,207 (100%) |
 | Duplicados eliminados | 0 |
 | Valores nulos críticos | 0 |
 | Variables transformadas | 1 (`Value`) |

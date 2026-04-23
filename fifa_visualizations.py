@@ -840,7 +840,7 @@ def generate_landing_page(
         </p>
         <div class="header-stats">
             <div class="stat-item">
-                <span class="stat-value">18,208</span>
+                <span class="stat-value">{len(df):,}</span>
                 <span class="stat-label">Jugadores</span>
             </div>
             <div class="stat-item">
@@ -883,7 +883,7 @@ def generate_landing_page(
                 Este dashboard interactivo presenta un an&aacute;lisis exploratorio de datos (EDA) completo
                 sobre el dataset <strong>FIFA Player Statistics</strong>, extra&iacute;do de
                 <a href="https://www.kaggle.com" style="color: var(--color-accent);" target="_blank" rel="noopener">Kaggle</a>.
-                El dataset contiene informaci&oacute;n detallada de <strong>18,208 jugadores profesionales</strong>
+                El dataset contiene informaci&oacute;n detallada de <strong>{len(df):,} jugadores profesionales</strong>
                 de 164 pa&iacute;ses, incluyendo atributos de juego, datos demogr&aacute;ficos y valores de mercado.
             </p>
             <p>
@@ -912,7 +912,7 @@ def generate_landing_page(
                     <span class="chart-badge badge-dist">Distribuci&oacute;n</span>
                     <h2>Distribuci&oacute;n Etaria de Jugadores</h2>
                     <p>
-                        El histograma muestra c&oacute;mo se distribuyen las edades de los 18,208 jugadores.
+                        El histograma muestra c&oacute;mo se distribuyen las edades de los {len(df):,} jugadores.
                         La l&iacute;nea punteada indica la media del dataset (~25 a&ntilde;os).
                     </p>
                 </div>
@@ -1150,7 +1150,7 @@ def main():
     print("GUARDANDO VISUALIZACIONES")
     print("="*60)
 
-    output_dir = r'C:\Users\IPF-2026\Desktop\big-data-trabajo-1'
+    output_dir = '.'
 
     fig_age.write_html(f"{output_dir}\\fifa_age_histogram.html")
     print(f"Guardado: {output_dir}\\fifa_age_histogram.html")
